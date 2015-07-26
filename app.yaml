@@ -1,0 +1,16 @@
+application: scrambled-note
+version: 1-0
+runtime: go
+api_version: go1
+
+handlers:
+- url: /favicon\.ico
+  static_files: static/default/img/favicon.ico
+  upload: static/default/img/favicon\.ico
+  expiration: "364d"
+- url: /default_.*_
+  static_dir: static/default
+  expiration: "0d 5m"
+  # expiration: "364d"
+- url: /.*
+  script: _go_app
