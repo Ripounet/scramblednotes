@@ -1,4 +1,4 @@
-application: scrambled-note
+application: scrambled-notes
 version: 1-0
 runtime: go
 api_version: go1
@@ -12,5 +12,9 @@ handlers:
   static_dir: static/default
   expiration: "0d 5m"
   # expiration: "364d"
+- url: /
+  static_files: index.html
+  upload: index\.html
+  expiration: "0d 1m"
 - url: /.*
   script: _go_app
