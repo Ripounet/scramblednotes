@@ -1,4 +1,4 @@
-// scramblednotes is an online notepad.
+// Package scramblednotes is an online notepad.
 //
 // It is intended to be fast, reasonably secure, and to provide a few offline features.
 //
