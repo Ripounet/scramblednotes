@@ -5,22 +5,26 @@ package scramblednotes
 type Note struct {
 	// ID of this version of this Note.
 	// IDs are unique inside a notebook.
-	// Note versions are read-only, which mean
-	ID int
+	// Note versions are read-only, which mean successive versions of a Note have distinct IDs.
+	ID NoteID
 
 	// OriginalID was the ID of the first version of this note, when it was created.
-	OriginalID int
+	OriginalID NoteID
+	// TODO make sure ID, OriginalID would not be better replaced by ID, Version ...
 
 	// Alive is true when this version is the last version for this OriginalID.
 	// Alive is false when this version exists only in history, and a newer version exists.
 	Alive bool
 
-	//
+	// Data hold the encrypted textual content
 	Data Ciphertext
 
 	// List of files attached to this Note.
 	AttachmentHashes []FileHash
 }
+
+// NoteID is the type of the ID of a Note. Not really sure yet about the underlying type.
+type NoteID int
 
 // A Ciphertext is scrambled data.
 // It should not be decrypted server-side.
