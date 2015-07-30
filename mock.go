@@ -1,11 +1,16 @@
 package scramblednotes
 
-import "math/rand"
+import (
+	"math/rand"
+	"strconv"
+)
 
 var mock = struct {
-	note              Note
-	notes             map[NoteID]Note
-	generateNewNoteID func() NoteID
+	note               Note
+	notes              map[NoteID]Note
+	globalDataVersion  string
+	touchGlobalVersion func()
+	generateNewNoteID  func() NoteID
 }{
 	note: Note{
 		ID:         123,
@@ -16,6 +21,8 @@ var mock = struct {
 
 	notes: map[NoteID]Note{},
 
+	globalDataVersion: "1",
+
 	generateNewNoteID: func() NoteID {
 		i := rand.Intn(999999)
 		return NoteID(i)
@@ -24,4 +31,13 @@ var mock = struct {
 
 func init() {
 	mock.notes[123] = mock.note
+	mock.touchGlobalVersion = func() {
+		mock.globalDataVersion = "v" + randomString()
+	}
+	mock.touchGlobalVersion()
+}
+
+func randomString() string {
+	i := rand.Intn(999999999)
+	return strconv.Itoa(i)
 }

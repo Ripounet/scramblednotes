@@ -31,7 +31,15 @@ func (r Response) String() (s string) {
 func sync(w http.ResponseWriter, r *http.Request) {
 	// Compare client freshness with server freshness.
 	// Serve the delta.
-	fmt.Fprint(w, "TODO")
+	clientDataVersion := r.FormValue("clientDataVersion")
+	if clientDataVersion == globalDataVersion() {
+		// Notes already up-to-date.
+		// I would have used code 304 but it's not very idiomatic in XHR
+		fmt.Fprint(w, Response{"success": true, "newContent": false, "globalDataVersion": globalDataVersion()})
+		return
+	}
+	// TODO in JSON: somehow give the delta...
+	fmt.Fprint(w, Response{"success": true, "newContent": true, "globalDataVersion": globalDataVersion()})
 }
 
 func chunk(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +83,8 @@ func note(w http.ResponseWriter, r *http.Request) {
 		}
 		// TODO unmock
 		mock.notes[id] = note
-		fmt.Fprint(w, Response{"success": true, "note": note})
+		mock.touchGlobalVersion()
+		fmt.Fprint(w, Response{"success": true, "note": note, "globalDataVersion": globalDataVersion()})
 	case "PUT":
 		// Update a Note.
 		// TODO better think about coherent design fo Note.ID, Note.OriginalID
@@ -86,6 +95,11 @@ func note(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = id
+}
+
+func globalDataVersion() string {
+	// TODO unmock
+	return mock.globalDataVersion
 }
 
 func generateNewNoteID() NoteID {
