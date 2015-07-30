@@ -3,6 +3,7 @@ package scramblednotes
 import (
 	"math/rand"
 	"strconv"
+	"time"
 )
 
 var mock = struct {
@@ -35,6 +36,9 @@ func init() {
 		mock.globalDataVersion = "v" + randomString()
 	}
 	mock.touchGlobalVersion()
+
+	// Not the same sequence after each server restart
+	rand.Seed(time.Now().UnixNano())
 }
 
 func randomString() string {
