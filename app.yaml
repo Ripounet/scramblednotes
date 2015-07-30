@@ -12,7 +12,7 @@ handlers:
   static_dir: static/default
   expiration: "0d 5m"
   # expiration: "364d"
-- url: /
+- url: (/|/q/.*)
   static_files: index.html
   upload: index\.html
   expiration: "0d 1m"

@@ -2,7 +2,8 @@ $(function() {
 
 	$('#q').on('keyup',function() {
 		const str = $(this).val();
-		window.history.pushState('', '', '/' + str);
+		window.history.pushState('', '', '/q/' + str);
+		search(str);
 	});
 
 	$('#read').click(function() {
@@ -53,4 +54,19 @@ $(function() {
 		return "[" + note + "]";
 	}
 
+	function search(q){
+		console.log("Notes containing " + q + " :");
+		$.each(localStorage, function(key, x){
+			if(key.startsWith("Note ") && x.contains(q)){
+    			console.log(x);
+    		}
+		});
+	}
+
+	// Search string from URL (if any)
+	const pos = window.location.href.lastIndexOf('/');
+	if(pos !== -1){
+		const q = window.location.href.substring(pos + 1);
+		$("#q").val(q);
+	}
 });
