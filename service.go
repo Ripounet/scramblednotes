@@ -69,6 +69,7 @@ func note(w http.ResponseWriter, r *http.Request) {
 		// TODO unmock
 		note, exists := mock.notes[id]
 		if !exists {
+			c.Errorf("Note %v not found.", id)
 			w.WriteHeader(404)
 			fmt.Fprint(w, Response{"success": false, "message": "Not found."})
 			return
