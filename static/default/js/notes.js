@@ -2,13 +2,26 @@ $(function() {
 
 	$('#q').on('keyup',function() {
 		const str = $(this).val();
-		window.history.pushState('', '', '/q/' + str);
+		if( str == '' ){
+			window.history.pushState('', '', '/');
+		}else{
+			window.history.pushState('', '', '/q/' + str);
+		}
 		search(str);
 	});
 
 	$('#read').click(function() {
-		const scramble = localStorage["scramble123"];
-		console.log(scramble);
+		const noteId = $('#readId').val();
+		$.getJSON(
+			'/note',
+			{ id: noteId },
+			function(response) {
+				const scrambleB64 = response.note.Data;
+				const scramble = atob(scrambleB64);
+				console.log('Note ' + noteId + ' scramble = ' + scramble);
+				console.log('Note ' + noteId + ' content = ' + decrypt(scramble) );
+			}
+		);
 	});
 
 	$('#write').click(function() {
@@ -19,9 +32,11 @@ $(function() {
 				"ciphertext": ciphertext
 			}, 
 			function(r) {
+				// TODO: save locally BEFORE the request, in case of no internet
     			const newNoteId = r.note.ID;
     			localStorage["Scramble " + newNoteId] = ciphertext;
     			localStorage["Note " + newNoteId] = content;
+    			$("#note-content").val("");
 			}, 'json');
 	});
 
@@ -29,12 +44,10 @@ $(function() {
 		// This fetches updates from server
 		$.getJSON(
 			'/sync',
-			{ clientDataVersion: globalDataVersion },
-			function(r) {
-			  const serverDataVersion = r.globalDataVersion;
-			  if( serverDataVersion != globalDataVersion ){
-			  	 globalDataVersion = serverDataVersion;
-			  	 localStorage["globalDataVersion"] = serverDataVersion;
+			{ clientDataVersion: localStorage["globalDataVersion"] },
+			function(response) {
+			  if( response.globalDataVersion != localStorage["globalDataVersion"] ){
+			  	 localStorage["globalDataVersion"] = response.globalDataVersion;
 			  }
 			}
 		);
@@ -47,18 +60,25 @@ $(function() {
 		$("#private-key").val("");
 	});
 
-	var globalDataVersion = localStorage["globalDataVersion"];
-
 	// dirty means "I have made some local modifications, not pushed to server yet."
 	var dirty = false;
 
 	function decrypt(b64cipthertext){
-
+		// TODO a real decryption, with user private key
+		return encrypt(b64cipthertext)
 	}
 
 	function encrypt(note){
-		// TODO
-		return "[" + note + "]";
+		// TODO a real encryption, with user private key
+
+		// This fake encryption is a (symmetrical) XOR
+		var str = note;
+		var c = '';
+		const key = 'K';
+		for(i=0; i<str.length; i++) {
+    		c += String.fromCharCode(str[i].charCodeAt(0).toString(10) ^ key.charCodeAt(0).toString(10));
+		}
+		return c;
 	}
 
 	function search(q){

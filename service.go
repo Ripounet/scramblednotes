@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"appengine"
 )
 
 func init() {
@@ -57,6 +59,7 @@ func chunk(w http.ResponseWriter, r *http.Request) {
 
 // CRUD for a single Note
 func note(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
 	idStr := r.FormValue("id")
 	idInt, _ := strconv.Atoi(idStr)
 	id := NoteID(idInt)
@@ -70,6 +73,7 @@ func note(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, Response{"success": false, "message": "Not found."})
 			return
 		}
+		c.Infof("Serving note %s with cypher content %v", note.ID, note.Data)
 		fmt.Fprint(w, Response{"success": true, "note": note})
 	case "POST":
 		// New Note (no id yet)
@@ -81,6 +85,7 @@ func note(w http.ResponseWriter, r *http.Request) {
 			Alive:      true,
 			Data:       Ciphertext(ciphertext),
 		}
+		c.Infof("Storing new note %v with cypher content %v", note.ID, ciphertext)
 		// TODO unmock
 		mock.notes[id] = note
 		mock.touchGlobalVersion()
