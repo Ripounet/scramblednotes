@@ -40,6 +40,13 @@ $(function() {
 		);
 	});
 
+	$('#set-private-key').click(function() {
+		// Though the website could theorically peek at this value,
+		// it must never do so. The key belongs to the user, not to the server.
+		localStorage["Private Key"] = $("#private-key").val();
+		$("#private-key").val("");
+	});
+
 	var globalDataVersion = localStorage["globalDataVersion"];
 
 	// dirty means "I have made some local modifications, not pushed to server yet."
