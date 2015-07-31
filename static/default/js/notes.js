@@ -91,9 +91,9 @@ $(function() {
 	}
 
 	// Search string from URL (if any)
-	const pos = window.location.href.lastIndexOf('/');
+	const pos = window.location.href.lastIndexOf('/q/');
 	if(pos !== -1){
-		const q = window.location.href.substring(pos + 1);
+		const q = window.location.href.substring(pos + 3);
 		$("#q").val(q);
 	}
 });
