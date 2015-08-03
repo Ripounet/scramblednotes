@@ -1,7 +1,11 @@
 package scramblednotes
 
+import "time"
+
 // A Note is a small piece of text, typed or pasted by the user.
 // It is the most important entity of the Scrambled Notes application.
+// Not sure it will be used server-side however, as we may decide to
+// manage only opaque chunks.
 type Note struct {
 	// ID of this version of this Note.
 	// IDs are unique inside a notebook.
@@ -29,6 +33,22 @@ type NoteID int
 // A Ciphertext is scrambled data.
 // It should not be decrypted server-side.
 type Ciphertext []byte
+
+// A NoteChunk is a crypted collection of Notes, in a time period.
+type NoteChunk struct {
+	// NotebookID is the NoteBook ID. Stupid doc.
+	NotebookID int64
+
+	// Period loosely represents the time interval.
+	// E.g "2007" or "2015-07".
+	Period string
+
+	// Data holds the opaque, encrypted content.
+	Data Ciphertext
+
+	// LastSave is the last save date.
+	LastSaved time.Time
+}
 
 // FileHash is the SHA1 hash of the encrypted content of an Attachment.
 // In accordance with crypto/sha1, it consists in 20 bytes.

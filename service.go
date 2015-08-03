@@ -45,15 +45,45 @@ func sync(w http.ResponseWriter, r *http.Request) {
 }
 
 func chunk(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	notebookIDStr := r.FormValue("nbid")
+	notebookID, err := strconv.ParseInt(notebookIDStr, 10, 64)
+	if err != nil {
+		w.WriteHeader(400)
+		fmt.Fprint(w, Response{"success": false, "message": "Bad parameter nbid=" + notebookIDStr})
+		return
+	}
+	period := r.FormValue("period")
+
 	switch r.Method {
+
 	case "GET":
 		// Serve chunk according to GET params.
-		fmt.Fprint(w, "TODO")
+		_, chunk, err := getNoteChunk(c, notebookID, period)
+		if err != nil {
+			w.WriteHeader(500) // or better http code?
+			fmt.Fprint(w, Response{"success": false, "message": err.Error()})
+			return
+		}
+		fmt.Fprint(w, Response{"success": true, "chunk": chunk, "globalDataVersion": globalDataVersion()})
+
 	case "PUT":
 		// Update a client-computed chunk.
 		// Remember to check a version ID for coherence.
-		r.FormValue("period")
-		fmt.Fprint(w, "TODO")
+		data := r.FormValue("scrambleddata")
+		chunk := NoteChunk{
+			NotebookID: notebookID,
+			Period:     period,
+			Data:       Ciphertext(data),
+		}
+		_, err := saveChunk(c, chunk)
+		if err != nil {
+			w.WriteHeader(500) // or better http code?
+			fmt.Fprint(w, Response{"success": false, "message": err.Error()})
+			return
+		}
+		fmt.Fprint(w, Response{"success": true, "globalDataVersion": globalDataVersion()})
 	}
 }
 
