@@ -1,6 +1,7 @@
 $(function() {
 
-	$('#q').on('keyup',function() {
+	$('#q').on('keyup change paste',function() {
+		// TODO ignore arrow keys events
 		const str = $(this).val();
 		if( str == '' ){
 			window.history.pushState('', '', '/');
@@ -33,10 +34,10 @@ $(function() {
 			}, 
 			function(r) {
 				// TODO: save locally BEFORE the request, in case of no internet
-    			const newNoteId = r.note.ID;
-    			localStorage["Scramble " + newNoteId] = ciphertext;
-    			localStorage["Note " + newNoteId] = content;
-    			$("#note-content").val("");
+				const newNoteId = r.note.ID;
+				localStorage["Scramble " + newNoteId] = ciphertext;
+				localStorage["Note " + newNoteId] = content;
+				$("#note-content").val("");
 			}, 'json');
 	});
 
@@ -76,17 +77,23 @@ $(function() {
 		var c = '';
 		const key = 'K';
 		for(i=0; i<str.length; i++) {
-    		c += String.fromCharCode(str[i].charCodeAt(0).toString(10) ^ key.charCodeAt(0).toString(10));
+			c += String.fromCharCode(str[i].charCodeAt(0).toString(10) ^ key.charCodeAt(0).toString(10));
 		}
 		return c;
 	}
 
 	function search(q){
 		console.log("Notes containing " + q + " :");
+		var words = q.split(/\s+/);
 		$.each(localStorage, function(key, x){
-			if(key.startsWith("Note ") && x.contains(q)){
-    			console.log(x);
-    		}
+			if(!key.startsWith("Note "))
+				return;
+			for(var i = 0; i < words.length; i++) {
+				var word = words[i];
+				if( x.indexOf(word) === -1)
+					return;
+			}
+			console.log(x);
 		});
 	}
 
