@@ -28,15 +28,21 @@ $(function() {
 	$('#write').click(function() {
 		const content = $("#note-content").val();
 		const ciphertext = encrypt(content);
+		var date = Date.now();
 		$.post('/note', 
 			{
 				"ciphertext": ciphertext
 			}, 
 			function(r) {
 				// TODO: save locally BEFORE the request, in case of no internet
+				// TODO consider a conventional hash-id ...?
 				const newNoteId = r.note.ID;
-				localStorage["Scramble " + newNoteId] = ciphertext;
-				localStorage["Note " + newNoteId] = content;
+				localStorage["Note " + newNoteId] = JSON.stringify({
+					"content": content,
+					"ciphertext": ciphertext,
+					"createDate": date,
+					"updateDate": date
+				});
 				$("#note-content").val("");
 			}, 'json');
 	});
@@ -71,6 +77,7 @@ $(function() {
 
 	function encrypt(note){
 		// TODO a real encryption, with user private key
+		// TODO if user private key not set, ask it in a modal dialog
 
 		// This fake encryption is a (symmetrical) XOR
 		var str = note;
@@ -88,12 +95,15 @@ $(function() {
 		$.each(localStorage, function(key, x){
 			if(!key.startsWith("Note "))
 				return;
+			var note = JSON.parse(x);
+			if(!note.content)
+				return;
 			for(var i = 0; i < words.length; i++) {
 				var word = words[i];
-				if( x.indexOf(word) === -1)
+				if( note.content.indexOf(word) === -1)
 					return;
 			}
-			console.log(x);
+			console.log(note);
 		});
 	}
 

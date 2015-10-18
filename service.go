@@ -130,7 +130,7 @@ func note(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, Response{"success": true, "note": note, "globalDataVersion": globalDataVersion()})
 	case "PUT":
 		// Update a Note.
-		// TODO better think about coherent design fo Note.ID, Note.OriginalID
+		// TODO better think about coherent design for Note.ID, Note.OriginalID
 		fmt.Fprint(w, "TODO")
 		_ = id
 	case "DELETE":
