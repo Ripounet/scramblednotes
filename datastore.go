@@ -17,5 +17,6 @@ func saveChunk(c appengine.Context, chunk NoteChunk) (*datastore.Key, error) {
 	chunkKey := datastore.NewKey(c, "NoteChunk", chunk.Period, 0, notebookKey)
 	now := time.Now()
 	chunk.LastSaved = now
-	return datastore.Put(c, chunkKey, chunk)
+	c.Infof("Saving entry %v", chunkKey)
+	return datastore.Put(c, chunkKey, &chunk)
 }

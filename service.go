@@ -1,6 +1,7 @@
 package scramblednotes
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -71,13 +72,19 @@ func chunk(w http.ResponseWriter, r *http.Request) {
 	case "PUT":
 		// Update a client-computed chunk.
 		// Remember to check a version ID for coherence.
-		data := r.FormValue("scrambleddata")
+		dataB64 := r.FormValue("scrambleddata")
+		data, err := base64.StdEncoding.DecodeString(dataB64)
+		if err != nil {
+			w.WriteHeader(400)
+			fmt.Fprint(w, Response{"success": false, "message": err.Error()})
+			return
+		}
 		chunk := NoteChunk{
 			NotebookID: notebookID,
 			Period:     period,
 			Data:       Ciphertext(data),
 		}
-		_, err := saveChunk(c, chunk)
+		_, err = saveChunk(c, chunk)
 		if err != nil {
 			w.WriteHeader(500) // or better http code?
 			fmt.Fprint(w, Response{"success": false, "message": err.Error()})
