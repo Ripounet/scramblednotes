@@ -1,5 +1,10 @@
-$(function() {
 
+var notesIndex = lunr(function () {
+	this.field('content')
+	this.ref('id')
+});
+
+$(function() {
 	$('#q').on('keyup change paste',function() {
 		// TODO ignore arrow keys events
 		const str = $(this).val();
@@ -37,12 +42,15 @@ $(function() {
 				// TODO: save locally BEFORE the request, in case of no internet
 				// TODO consider a conventional hash-id ...?
 				const newNoteId = r.note.ID;
-				localStorage["Note " + newNoteId] = JSON.stringify({
+				var note = {
+					"id": newNoteId,
 					"content": content,
 					"ciphertext": ciphertext,
 					"createDate": date,
 					"updateDate": date
-				});
+				};
+				localStorage["Note " + newNoteId] = JSON.stringify(note);
+				indexNote(note);
 				$("#note-content").val("");
 			}, 'json');
 	});
@@ -60,6 +68,35 @@ $(function() {
 		);
 	});
 
+	$('#reindex').click(function() {
+		console.log("Reindexing");
+
+		$.each(localStorage, function(key, x){
+			if(!key.startsWith("Note "))
+				return;
+			var note = JSON.parse(x);
+			if(!note.content)
+				return;
+			console.log("Indexing note " + note.id + ": " + note.content );
+			indexNote(note);
+		});
+	});
+
+	$('#nuke').click(function() {
+		console.log("Nuking local db");
+
+		$.each(localStorage, function(key, x){
+			if(!key.startsWith("Note "))
+				return;
+			localStorage.removeItem(key);
+		});
+
+		notesIndex = lunr(function () {
+    		this.field('content')
+    		this.ref('id')
+  		});
+	});
+
 	$('#set-private-key').click(function() {
 		// Though the website could theorically peek at this value,
 		// it must never do so. The key belongs to the user, not to the server.
@@ -69,6 +106,13 @@ $(function() {
 
 	// dirty means "I have made some local modifications, not pushed to server yet."
 	var dirty = false;
+
+	function indexNote(note){
+		notesIndex.add({
+			id: note.id,
+			content: note.content,
+		});
+	}
 
 	function decrypt(b64cipthertext){
 		// TODO a real decryption, with user private key
@@ -90,6 +134,25 @@ $(function() {
 	}
 
 	function search(q){
+		console.log("Notes containing " + q + " :");
+		var hits = notesIndex.search(q);
+		//console.log("hits=" + hits);
+		$.each(hits, function(i, hit){
+			//console.log("hit=" + hit);
+			var id = hit.ref;
+			var key = "Note " + id;
+			var note = JSON.parse(localStorage[key]);
+			if(!note || !note.content){
+				console.warn("Problem 1 with " + key + ": " + note);
+				return;
+			}
+			console.log(note.content);
+		});
+	}
+
+	// Iterate on all notes to check if matches.
+	// Deprecated for perf reasons, of course.
+	function naiveSearch(q){
 		console.log("Notes containing " + q + " :");
 		var words = q.split(/\s+/);
 		$.each(localStorage, function(key, x){
