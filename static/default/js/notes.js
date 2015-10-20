@@ -147,7 +147,10 @@ $(function() {
 				console.warn("Problem 1 with " + key + ": " + note);
 				return;
 			}
-			console.log(note.content);
+			if( note.content.length < 200 )
+				console.log(note.content);
+			else
+				console.log(note.content.substring(0,200));
 		});
 	}
 
@@ -177,4 +180,32 @@ $(function() {
 		const q = window.location.href.substring(pos + 3);
 		$("#q").val(q);
 	}
+
+	//
+	// At startup, load the a notes database from local file... TODO remove this asap
+	//
+	var loadDbStart = performance.now();
+	$.getJSON("/default_XXX_/partial.json", function(db) {
+		var loadDbEnd = performance.now();
+		var duration = loadDbEnd - loadDbStart;
+    	console.log("Loaded " + db.length + " entries in " + duration + "ms.");
+    	//db = db.slice(-500);
+    	loadDbStart = performance.now();
+
+		$.each(db, function(key, importedNote){
+			var id = importedNote.nid;
+			var note = {
+				"id": id,
+				"content": importedNote.text,
+			};
+			localStorage["Note " + id] = JSON.stringify(note);
+			indexNote(note);
+		});
+
+		loadDbEnd = performance.now();
+		duration = loadDbEnd - loadDbStart;
+    	console.log("Indexed in " + duration + "ms.");
+    	console.log("Index size: " + JSON.stringify(notesIndex).length );
+	});
 });
+
