@@ -34,6 +34,7 @@ $(function() {
 		const content = $("#note-content").val();
 		const ciphertext = encrypt(content);
 		var date = Date.now();
+		dirty = true;
 		$.post('/note', 
 			{
 				"ciphertext": ciphertext
@@ -52,6 +53,7 @@ $(function() {
 				localStorage["Note " + newNoteId] = JSON.stringify(note);
 				indexNote(note);
 				$("#note-content").val("");
+				dirty = false;
 			}, 'json');
 	});
 
