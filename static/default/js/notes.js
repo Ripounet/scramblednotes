@@ -63,6 +63,7 @@ $(function() {
 			function(response) {
 			  if( response.globalDataVersion != localStorage["globalDataVersion"] ){
 			  	 localStorage["globalDataVersion"] = response.globalDataVersion;
+			  	$("#local-freshness").html(response.globalDataVersion);
 			  }
 			}
 		);
