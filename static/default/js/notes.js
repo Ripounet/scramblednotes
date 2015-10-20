@@ -11,7 +11,7 @@ $(function() {
 		if( str == '' ){
 			window.history.pushState('', '', '/');
 		}else{
-			window.history.pushState('', '', '/q/' + str);
+			window.history.pushState('', '', '/q/' + encodeURI(str));
 		}
 		search(str);
 	});
@@ -48,7 +48,6 @@ $(function() {
 					"content": content,
 					"ciphertext": ciphertext,
 					"createDate": date,
-					"updateDate": date
 				};
 				localStorage["Note " + newNoteId] = JSON.stringify(note);
 				indexNote(note);
@@ -193,20 +192,25 @@ $(function() {
     	console.log("Loaded " + db.length + " entries in " + duration + "ms.");
     	//db = db.slice(-500);
     	loadDbStart = performance.now();
+    	var n = 0;
 
 		$.each(db, function(key, importedNote){
 			var id = importedNote.nid;
+			if(importedNote.deletion_date)
+				return;
 			var note = {
 				"id": id,
 				"content": importedNote.text,
+				"createDate": importedNote.creation_date,
 			};
 			localStorage["Note " + id] = JSON.stringify(note);
 			indexNote(note);
+			n++;
 		});
 
 		loadDbEnd = performance.now();
 		duration = loadDbEnd - loadDbStart;
-    	console.log("Indexed in " + duration + "ms.");
+    	console.log("Indexed " + n + " notes in " + duration + "ms.");
     	console.log("Index size: " + JSON.stringify(notesIndex).length );
 	});
 });
