@@ -211,7 +211,17 @@ $(function() {
 		loadDbEnd = performance.now();
 		duration = loadDbEnd - loadDbStart;
     	console.log("Indexed " + n + " notes in " + duration + "ms.");
-    	console.log("Index size: " + JSON.stringify(notesIndex).length );
+
+    	// Put index in localStorage.
+    	// Warning: this is expensive and redundant. But greatly improves
+    	// startup time.
+    	loadDbStart = performance.now();
+    	var notesIndexAsString = JSON.stringify(notesIndex);
+    	console.log("Index size: " + notesIndexAsString.length );
+    	localStorage["notesIndex"] = notesIndexAsString;
+		loadDbEnd = performance.now();
+		duration = loadDbEnd - loadDbStart;
+    	console.log("Saved index to localStorage in " + duration + "ms.");
 	});
 });
 
