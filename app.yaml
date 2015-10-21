@@ -16,5 +16,8 @@ handlers:
   static_files: index.html
   upload: index\.html
   expiration: "0d 1m"
+- url: /react
+  static_files: react.html
+  upload: react\.html
 - url: /.*
   script: _go_app
