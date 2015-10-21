@@ -4,6 +4,8 @@ var notesIndex = lunr(function () {
 	this.ref('id')
 });
 
+var timeSearchKeyPressed = 0;
+
 $(function() {
 	$('#q').on('keyup change paste',function() {
 		// TODO ignore arrow keys events
@@ -13,7 +15,8 @@ $(function() {
 		}else{
 			window.history.pushState('', '', '/q/' + encodeURI(str));
 		}
-		search(str);
+		timeSearchKeyPressed = new Date().getTime();
+		setTimeout(search, 600, str, timeSearchKeyPressed);
 	});
 
 	$('#read').click(function() {
@@ -135,7 +138,11 @@ $(function() {
 		return c;
 	}
 
-	function search(q){
+	function search(q, thisTimeKeyPressed){
+		if(thisTimeKeyPressed != timeSearchKeyPressed){
+			// Hold because next call will follow
+			return;
+		}
 		console.log("Notes containing " + q + " :");
 		var hits = notesIndex.search(q);
 		//console.log("hits=" + hits);
